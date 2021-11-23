@@ -16,6 +16,7 @@ jobs:
           path: paper.pdf
       - name: Release
         uses: ncipollo/release-action@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           tag: Latest
           artifacts: "paper.pdf"
