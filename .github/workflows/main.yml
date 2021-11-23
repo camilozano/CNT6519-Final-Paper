@@ -15,7 +15,7 @@ jobs:
           name: PDF
           path: paper.pdf
       - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/heads/main')
+        uses: ncipollo/release-action@v1
         with:
-          files: paper.pdf
+          tag: Latest
+          artifacts: "paper.pdf"
