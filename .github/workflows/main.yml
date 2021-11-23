@@ -14,3 +14,8 @@ jobs:
         with:
           name: PDF
           path: paper.pdf
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/heads/main')
+        with:
+          files: paper.pdf
