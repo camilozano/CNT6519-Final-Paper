@@ -153,7 +153,14 @@ The problem becomes that in a race to the bottom of prices it has lead to corner
 
 In 2018 smart device manufacturer Tapplock began selling a \$100 smart lock, mean to be a sort of gym locker lock that would allow for unlocking with a fingerprint, with a solid steel construction it also had a mobile app that would allow for unlocking the lock over Bluetooth Low Energy (BLE).
 On first glance the lock boasted an 'AES 128-bit encryption', but forensic experts quickly started finding some flaws in its implementations. According to the team, they went from obtaining the lock to completely defeating its security in a mere 45 minutes! \cite{Ken_2018}
-What they did was manually pair the BLE device to their computer in which they could then use a tool like Wireshark to sniff the traffic between the lock. To their surprise the lock was using HTTP API requests to control the lock over plaintext. This was the first major red flag, this means anyone able to intercept or be in the middle of the communication would be able to sniff and replicate packets to control it.
+
+What they did was manually pair the BLE device to their computer in which they could then use a tool like Wireshark to sniff the traffic between the lock. To their surprise the lock was using HTTP API requests to control the lock over plaintext. This was the first major red flag, this means anyone able to intercept or be in the middle of the communication would be able to sniff and replicate packets to control it. 
+
+The way they were 'securing' their requests was by using some random data attached to the request. The problem was that it was the same random data on each request, meaning that it was a symmetric key. Knowing this allows can allow for any payload for it to be sent.
+Additionally another feature of the app allows for the user to share temporarily access to a guest, but as it turns out the key that you share is the same master key as the user. So even though you can set an expiration date for the guest, they essentially have access to the whole security.
+
+The biggest revelation came from a dumping of code on the chip which revealed how the encryption key was being generated. It generates a hash based of some seed value, which turns out is just the MAC address as a string of the BLE devices, which is the only piece of data that is available to the an attacker!
+This was then automated to be used in an app which would scan for nearby BLE devices and identify those that were a Tapplock device then use its MAC address to generate a key and unlock the key. Meaning that anyone with a phone in range of a Tapplock device can unlock it in less than a a couple seconds!
 
 
 
