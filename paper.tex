@@ -162,6 +162,17 @@ Additionally another feature of the app allows for the user to share temporarily
 The biggest revelation came from a dumping of code on the chip which revealed how the encryption key was being generated. It generates a hash based of some seed value, which turns out is just the MAC address as a string of the BLE devices, which is the only piece of data that is available to the an attacker!
 This was then automated to be used in an app which would scan for nearby BLE devices and identify those that were a Tapplock device then use its MAC address to generate a key and unlock the key. Meaning that anyone with a phone in range of a Tapplock device can unlock it in less than a a couple seconds!
 
+\subsection{Mirai Malware}
+
+One of the most common type of internet based attacks is a Denial-of-Service (DoS) attack. This is when a malicious user or group of users is able to flood a server with requests and cause it to crash. Usually the way to prevent his is by having a firewall in place that blocks all traffic from the attacker. This is done by identifying some sort of pattern in the traffic and blocking it. An advanced form of this attack is a Distributed DoS (DDoS), which consists of a coordinated attacked by many with varying ranging IPs that would be much harder to identify and block. 
+
+In 2016 a botnet malware started to randomly appear. A large amount of CCTV, routers and other IoT devices were being compromised by this malware. It was specially hard to detect as the IoT devices remained mostly fine except for every now and them some sluggishness every and increased bandwith. What was interesting is that this malware is that it is not complex in its nature. What it does once a device is infected is randomly scan for IPs and attempt to ping them on certain known ports. The developer compiled a list of known manufacturers default ports, usernames and passwords. Each node then just attempts pinging until it finds an open device, then its IP is uploaded to a controller that then contacts the other nodes to try to authenticate on the known device until eventually some are compromised by their default passwords. 
+
+Once inside on a compromised device, the malware installs itself on the new device and continues to propagate. This allowed the malware to scale massively. This was then used to DDoS a bunch of websites, including a OVH (one of France's largest hosting companies), Dyn (a DNS provider), and even a cyber security journalist. At its peak there was a recorded bandwidth hitting 1 Tbit/s!\cite{Hertzberg_Mirai_2016}
+
+Most interestingly the was that the source code of the malware was eventually leaked and the creator was identified! Apparently the author had a IT security company that offered protection against DDoS. In a way they were running a protection racket, initially starting with Minecraft servers.
+
+This attack revealed how major manufacturers were using default credentials and allowing easy exploitable security issues. Since the code has been open sourced others have taken to fork it and adapt the same concept to different devices.
 
 
 \bibliographystyle{ACM-Reference-Format}
