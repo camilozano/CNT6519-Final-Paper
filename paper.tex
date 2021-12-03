@@ -178,7 +178,7 @@ The attack centers around the 4-way handshake utilized by the WPA2 protocols. Co
   \label{fig:4way}
 \end{figure}
 
-The attack occurs during message #3 of the 4-message handshake. The access point will retransmit message #3 if does not get a response. This retransmission causes a reset in the incremental packet number and the receive replay counter. A man in the middle attack can trap message #3 and force this reset and a previously used encryption key used. This also causes a reuse of previous keystream to encrypt packet data. If the packets have known content, it become quite easy to derive the previously used keystream. Obtaining the keystream allows for the attacker to decrypt messages containing the same nonce.
+The attack occurs during message 3 of the 4-message handshake. The access point will retransmit message 3 if does not get a response. This retransmission causes a reset in the incremental packet number and the receive replay counter. A man in the middle attack can trap message 3 and force this reset and a previously used encryption key used. This also causes a reuse of previous keystream to encrypt packet data. If the packets have known content, it become quite easy to derive the previously used keystream. Obtaining the keystream allows for the attacker to decrypt messages containing the same nonce.
 This vulnerability could allow attackers to obtain sensitive data. In addition, they could also inject ransomware or malware into the stream of data. An attacker could also hijack a website and provide an alternate destination in order to collect sensitive information. Interestingly enough, the attack cannot obtain the encryption keys or WiFi password.
 
 \subsection{WPA3 Vulnerabilities}
