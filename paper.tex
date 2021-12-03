@@ -31,7 +31,7 @@
 
 
 \author{Evan Lomax}
-\email{evn.lmx@gmail.com}
+\email{evn@knights.ucf.edu}
 \affiliation{%
   \institution{University of Central Florida}
   \city{Orlando}
@@ -39,7 +39,7 @@
 }
 
 \author{Shenequa Hayes}
-\email{shenequa.hayes@gmail.com}
+\email{shenequa.hayes07@knights.ucf.edu}
 \affiliation{%
   \institution{University of Central Florida}
   \city{Orlando}
@@ -53,7 +53,7 @@
   \country{USA}
 }
 \author{Shannon Padilla}
-\email{JPCharme@gmail.com}
+\email{jamespadilla@knights.ucf.edu}
 \affiliation{%
   \institution{University of Central Florida}
   \city{Orlando}
@@ -139,6 +139,7 @@ This was then automated to be used in an app which would scan for nearby BLE dev
 
 \subsection{Mirai Malware}
 
+
 One of the most common type of internet based attacks is a Denial-of-Service (DoS) attack. This is when a malicious user or group of users is able to flood a server with requests and cause it to crash. Usually the way to prevent his is by having a firewall in place that blocks all traffic from the attacker. This is done by identifying some sort of pattern in the traffic and blocking it. An advanced form of this attack is a Distributed DoS (DDoS), which consists of a coordinated attacked by many with varying ranging IPs that would be much harder to identify and block. 
 
 In 2016 a botnet malware started to randomly appear. A large amount of CCTV, routers and other IoT devices were being compromised by this malware. It was specially hard to detect as the IoT devices remained mostly fine except for every now and them some sluggishness every and increased bandwith. What was interesting is that this malware is that it is not complex in its nature. What it does once a device is infected is randomly scan for IPs and attempt to ping them on certain known ports. The developer compiled a list of known manufacturers default ports, usernames and passwords. Each node then just attempts pinging until it finds an open device, then its IP is uploaded to a controller that then contacts the other nodes to try to authenticate on the known device until eventually some are compromised by their default passwords. 
@@ -151,7 +152,58 @@ This attack revealed how major manufacturers were using default credentials and 
 
 \subsection{Best Practices}
 
-As demonstrated from above 
+While there is many attack vulnerabilities by just using these IOT products it does not mean that you are always sacrificing security and privacy for using these devices, there a couple best practices that are recommended to take in order to prevent some of the most common attacks. One of the most recommended things that you can do is having a separate network for any IOT device. This can take many different forms, the easiest being is enabling the guest network option that is available on some routers. The router can create a secondary network for guests, but in this case you create it (and use WPA2/WPA3 to secure the network) and only use it to hook up those devices. The idea behind this being that even if there were some malicious software running on the IOT those devices could not connect to the other devices and sniff data off the network because your other phones and computer devices would be on a different network they can not access. Another way to implement this is setting up a different subnetwork and have a MAC filtering to do this but it is a more complicated approach. 
+
+When it comes to home appliances and automation the best most secure approach is to have your own self hosted solution such as running Home Assistant and having that be the main interface for your other devices. Home Assistant supports a multitude of different IOT devices, but the best in these case are those that are those IOT devices that support ZWave, or ZigBee as their main networking interface as the device itself is not connecting to your home network rather a hub which controls what data goes in and out. There are now more common off the shelf appliances that can serve as the hub such as Samsung SmartThings and certain Alexa devices, but nothing could be more secure than hosting your own.
+
+
+\section{802.11 Vulnerabilities}
+
+
+\subsection{Background}
+
+WiFi was derived from the 1971 ALOAHnet that connected the Hawaiian islands with a UHF wireless packet network. However, it was not until 1997 that the 802.11 standard was released. Numerous amendments and revisions aside, the basic foundation of WiFi has not changed drastically. Most advances center around security protocols and speed or efficiency enhancements. Early security protocols included Wired Equivalent Privacy (WEP) and WiFi Protected Access (WPA). Many vulnerabilities were discovered in these protocols and were quickly replaced with WiFi Protected Access version 2 (WPA-2). WPA-2 is the current standard, but will be soon replaced with WiFi Protected Access version 3 (WPA-3) \cite{berg2011ieee}.
+
+
+\subsection{WPA2 Vulnerabilities}
+
+
+In 2017, Mathy Vanhoef of imec-DistriNet discovered a serious weakness in WPA2. He determined that attackers could use key reinstallation attacks (KRACKs) which would effectively decrypt transmitted data. This vulnerability was found in the WPA2 protocol itself and any implementation of WPA2 is likely to be vulnerable. This is thought to be the first exploit of the protocol itself. Previous attacks exploited flaws in the WiFi Protected Setup, drivers, random number generators, predictable pre-shared keys and insecure enterprise authentication. 
+The attack centers around the 4-way handshake utilized by the WPA2 protocols. Connection to a WiFi network starts with an authentication and association to an access point. During this stage, it is considered an Open System authentication, as it is merely an introduction.  As the handshake continues, a Pairwise Transient Key (PTK) is created. The PTK is generated from the Pairwise Master Key (PMK), Authenticator Nonce (ANonce), Supplicant Nonce (SNonce), and the MAC addresses of the requesting machine and access point. Upon generation, the PTK split into a Key Confirmation Key (KCK), Key Encryption Key (KEK), and a Temporal Key (TK). KCK and KEK are used to protect the handshake messages, whilst the TK protects normal data frames \cite{vanhoef2017key}. See Figure \ref{fig:4way}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\linewidth]{imgs/wpa-4way.jpg}
+  \caption{4-way Handshake \cite{t_2021}}
+  \label{fig:4way}
+\end{figure}
+
+The attack occurs during message #3 of the 4-message handshake. The access point will retransmit message #3 if does not get a response. This retransmission causes a reset in the incremental packet number and the receive replay counter. A man in the middle attack can trap message #3 and force this reset and a previously used encryption key used. This also causes a reuse of previous keystream to encrypt packet data. If the packets have known content, it become quite easy to derive the previously used keystream. Obtaining the keystream allows for the attacker to decrypt messages containing the same nonce.
+This vulnerability could allow attackers to obtain sensitive data. In addition, they could also inject ransomware or malware into the stream of data. An attacker could also hijack a website and provide an alternate destination in order to collect sensitive information. Interestingly enough, the attack cannot obtain the encryption keys or WiFi password.
+
+\subsection{WPA3 Vulnerabilities}
+
+Beginning in July 1, 2020, WPA3 became the new standard and all devices that carry the WiFi certification must be in compliance. However, once again, Mathy Vanhoef has discovered a potential new attack to the WiFi technology. He has dubbed this security vulnerability as the fragmentation and aggregation attacks (FragAttacks). This attack does require that the attacker be in range of the network, so exposure is limited. However, three of the new vulnerabilities are design flaws in the WiFi standard which exposes most devices to attack. The shining light is that most of these exploits require user interaction or uncommon network settings, so in practice these vulnerabilities are limited in scope. The biggest issue lies in the programming mistakes found in WiFi products, which makes them easy to exploit. These exploits allow for the theft of sensitive data as well as allow access to devices connected to your network \cite{vanhoef2021fragment}.
+
+Many access points and WiFi devices accept fragmented frames as a normal course of function. While this may be common, reassembly of the frames has little to know validation. Attackers can submit fragments which have different keys which goes unnoticed during reassembly. In addition, aggregated frames include a flag to indicate aggregation, but it is not validated.
+
+
+
+\section{Mobile Forensics}
+\subsection{Introduction to Mobile Forensics}
+Mobile device forensics is a subcategory of digital forensics.  It involves the recovery of digital evidence or data from any mobile device.  These mobile devices include mobile phones, smart phones, tablets, personal digital assistants (PDAs), and Global Positioning Systems (GPS).  Another type of mobile device is wearable technology, for example an Apple watch or Fitbit fitness tracker.  These types of mobile devices can store several types of private information.  This information consists of call history, contact list, incoming and outgoing text messages, pictures, videos, audio files and voicemail messages. With the usage of smart phones, the data set also comprises internet browsing history, previous Wi-Fi connections, calendars, analytical information, geolocation data, and documents.  Some people have been known to save notes with account user credentials, passwords, and passcodes in their mobile devices as well.  All this information could be useful in an investigation.  Given the wide variety of mobile devices, there are different ways each device version must be handled.  The differentiation of the data on the device depends on the cell phone generation, the device brand, and the version of the specific model.  As a part of digital forensics investigations, there are specific tools that should be used to ensure the integrity of the mobile devices during transport from one place to the next.  Additionally, there are various data collecting techniques used for data analysis and preservation.
+
+\subsection{Progression of the Cellular Networks}
+Cellular networks and technologies have changed massively since their arrival in the late 1970s.  The first-generation mobile networks started in Japan in 1979 before other countries like the US and United Kingdom.  This technology was known as the advanced mobile phone system (AMPS).  The AMPS used frequency division multiple modulation and only had a capacity of 30 kilohertz and 2.4 kbps of speed.  The 1g network only allowed voice calls and had limited protection against hackers.  The second-generation network started around 1991.  This system was based on digital signals from the global system for mobile communications (GSM).  The 2g network offered bandwidths of 30 kHz to 200 kHz.  The users could also send SMS/MMS messages up to 64 kb.  Soon after, 2.5g was established and enabled data rates up to 144 kbps.  These rates allowed for browsing the web and sending   and receiving email messages. In the year 2000, the third-generation network was introduced in Europe as UMTS and CDMA in the US.  The introduction of 3G became more about social connections and supported higher speeds.  The 3G upgrade also enabled video calls, sharing files, watching television, and more surfing the internet and now for playing online games.  The fourth-generation network era brought about the usage of smartphones and other handheld devices.  These devices have speeds from 10 Mbps and 1 Gbps.  Fourth generation was the first cellular network generation to use long term evolution (LTE), which offers users better voice quality, less buffering time, instant messaging and social media, faster downloads, and quality streaming.    The 4G cellular network is also the first IP based mobile network with the technology to accommodate the quality of service and requirements including broadband access, multimedia messaging services (MMS), video chat, mobile TV, HDTV content, and digital video broadcasting.  As the 4g network tries to keep up with the demand of augmented reality and development of autonomous vehicles, the 5g revolution has begun.  The 5th generation network is being created to enhance the growing rate of new mobile applications and standards.  The output of 5G devices is 1000 times faster than 4G at 10 Gbps and will support the number of IoT (internet of things) sensors and devices.  
+
+\subsection{Mobile Phone Types}
+When discussing cell phone brands, we all have our own personal preferences.  The reason why we like specific brands could be user friendliness, customization capabilities, security resources, the price or just the look of the device.  In mobile device forensics you must be knowledgeable of data extraction from all mobile phone brands.  There are two major mobile phone manufacturers that everyone uses, which are Apple and Samsung.  These manufacturers also develop tablets and other personal devices that use similar operating systems to the mobile phones.  Because the operating systems are similar, the same tools can be used for testing.  To begin analysis, you must identify the hardware type and the firmware that has been installed.  For the Apple iPhone, this information has been impressed onto the back of the devices shell.  This information could also be access by navigating to the phone menu settings/general/about/version.   Once you have this information, you would use software, acquired from a reputable site for Apple device evaluation, loaded on a removable drive or disc to communicate with the device.  This software will have a list of commands to use for data extraction.  When searching for the software information on an Android device, you would go to menu Settings/About Phone/Software Information.  For Android device analysis, you would download Android software development kit.  Hardware and software analysis vary for mobile devices because of the numerous brands and versions.  For this reason, there is not a universal solution for analysis nor acquisition of all cell phones and other mobile devices.
+
+\subsection{Device Preservation and Data Collecting Techniques}
+Data collecting and preservation for mobile device forensics is getting more complicated as the devices advance.  Mobile devices are used for both personal and professional purposes, so the data contained reflects that.  To recover the digital evidence and other relevant data, you must follow the guidelines for preservation and examination.  All the methods and techniques must be forensically sound, meaning all actions and processes used must respect international guidelines and avoid the alteration of the original devices.  For mobile device forensics, digital forensics in general as well, evidence should always be preserved in process in a manner that allows it to be used in a court of law.  When moving mobile devices from the scene, there are two things to consider: lock activation and network/cellular connection.  Preventing network connection is important to ensure that the mobile device is not changed remotely.  The mobile device can be isolated by placing the device on airplane mode to disable Wi-Fi and hotspots.  It is also important to make sure the device has a full charge to avoid shutdown.  During storage and transportation, Faraday bags are a great tool to use.  A simple Faraday bag will isolate the device from receiving radio signals while keeping the device charged with an emergency battery.  All original cords and chargers should be removed from the scene and secluded away from the device.  Faraday cases are made from silver, copper, or nickel.  They have RoHS (Restriction of Hazardous Substances) double layer conductors, which are best for blocking EMF (electromagnetic fields) signals.  Another tool that could be used for isolation during transportation is a jammer.  A jammer sends radio waves with the same frequency as mobile phones, which causes interference between communications and paralyzes every phone in the range of the jammer.  In some countries jammers are illegal and are only allowed to be used by law enforcement.  There are many data collecting techniques.  Your plan of execution as a digital forensics professional, must include an outline of actions taken in sequence.  This is necessary because the process may have to be duplicated at another time.  Mobile forensics data collecting methods can be non-invasive and invasive.  As a good rule of thumb, always start with non-invasive techniques because “they tend to endanger the device is integrity to a lesser degree” (Kostadinov, 2019).  Types of noninvasive mobile forensics data extraction methods include manual extraction, logical extraction, hex dump, and JTAG.  When arriving at the crime scene some devices may already be unlocked.  If this is the case, then manual extraction is possible.  Manual extraction is when you browse through the mobile device’s data by using the touch screen or keypad.  Ideally during manual extraction, you would document and take photos of the device while you're browsing.  Logical extraction involves connecting the mobile device to a forensically sound workstation.  The connection is established by using USB cords, Bluetooth, or RJ-45 cables.  Command requests for data retrieval from the computer to the mobile device.  With this method, data could be added to the mobile device altering the integrity.  The hexdump process is performed when the mobile device is connected to a forensically sound workstation, then using a bootloader a set of instructions will be delivered to dump the memory from the phone onto the computer.  A downside of this method is that the format of this data will be binary.  However, deleted data can be recovered with this process.  When using the JTAG method, you connect to test access ports on the mobile device, then send commands to the processor to transfer the raw data stored on memory chips.  This technique is a favorite among digital forensics professionals because you can gain access to the mobile devices memory without risking the integrity of the device.  However, this procedure takes more time and requires an extensive knowledge of JTAG for different models of mobile devices as well as an approach to arrange the binary data retrieved.  Invasive mobile forensics data extraction methods are more time consuming and more complex.  These methods are ideal when a device has been severely damaged and is no longer functional.  In this case the flash memory chips from the device will have to be removed and a forensic image taken.  The types of invasive mobile forensics data collection techniques are chip off and micro read.  The chip off method refers to the data being retrieved directly from the mobile device’s memory chip.  First the chip would be detached from the mobile device and inserted into a chip reader or, if applicable, a second phone could be used to read the data from the chip.  Cloning the chip from the mobile device may also be necessary if it is not severely damaged. The chip off technique is difficult because there are different types of memory chips used in mobile manufacturing.  There is a lot of training that an examiner must complete in order to apply this method in any investigation.  Additionally, special hardware may be required to work with the memory chips from the devices.  The other invasive technique used for data extraction on mobile devices is micro read.  The micro read method requires the usage of electron microscope to analyze data seen physically on the memory chip.  This technique requires the maximum level proficiency from the mobile forensic expert.  
+
+\subsection{Last Thoughts for Mobile Forensics}
+	Mobile forensics is the branch of digital forensics investigations that involves data retrieval from mobile devices.  The examining of these various devices depends on the type of device as well as the company who produces it.  Knowing how to analyze the mobile device is also determined by the version and model.  The condition of the mobile device at the scene will depict which data collecting technique will be best to perform.  As the mobile device industry evolves, future data collection techniques will have to be created in order to keep up with the times.  Currently automobile manufacturers are racing to develop autonomous vehicles, so where in the forensic spectrum will those fall?
 
 \section{802.11 and Mobile Forensic Tools}
 
@@ -161,7 +213,7 @@ Wireless Access Points (WAP) can also contain fruitful information for a forensi
 %Below is a screenshot example of a wireless log from a WAP:
 
 \begin{figure}[H]
-  \centering
+ \centering
   \includegraphics[width=0.5\linewidth]{imgs/waplog.jpg}
   \caption{Screenshot of a wireless log from a WAP}
   \label{fig:waplog}
@@ -171,41 +223,41 @@ This particular log shows real-time connections which can be volatile. Forensic 
 
 \subsection{Wireshark}
 
-In order to an examiner to capture network traffic, an 802.11 wireless card with “monitor mode” capability is required. Wireshark is a useful tool and probably the most used by forensic examiners for monitoring network traffic live and examining historic pcap files. Wireshark allows the examiner to analyze traffic and filter exactly what they are looking for. 
+In order for an examiner to capture network traffic, an 802.11 wireless card with “monitor mode” capability is required. Wireshark is a useful tool and probably the most used by forensic examiners for monitoring network traffic live and examining historic pcap files. Wireshark allows the examiner to analyze traffic and filter exactly what they are looking for. 
 %Below is a screen shot of a live capture using Wireshark:
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.5\linewidth]{imgs/wireshark.jpg}
-  \caption{Screenshot of Wireshark log}
-  \label{fig:wireshark}
-\end{figure}
+%\begin{figure}[H]
+%  \centering
+%  \includegraphics[width=0.5\linewidth]{imgs/wireshark.jpg}
+%  \caption{Screenshot of Wireshark log}
+%  \label{fig:wireshark}
+%\end{figure}
 
-Wireshark displays tons of data on each packet to include packet number of the capture, source IPs, destination Ips, protocols, frame information, mac addresses and packet data. 
+Wireshark displays tons of data on each packet to include packet number of the capture, source IPs, destination IPs, protocols, frame information, mac addresses and packet data. 
 
 \subsection{Snort}
 
 Snort is another tool that can be utilized by an examiner to analyze network traffic. Snort is different from Wireshark in the fact that it can also be used as an Intrusion Protection System. Snort is a type of tool that an enterprise client would likely use such as a network administrator for a company. Snort can alert users of malicious packets set by rules and also log packets for historic analysis. 
 %Below is a screenshot of the Snort interface:
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.5\linewidth]{imgs/snort.jpg}
-  \caption{Screenshot of Snort interface}
-  \label{fig:snort}
-\end{figure}
+%\begin{figure}[H]
+%  \centering
+%  \includegraphics[width=0.5\linewidth]{imgs/snort.jpg}
+%  \caption{Screenshot of Snort interface}
+%  \label{fig:snort}
+%\end{figure}
 
 \subsection{Engage}
 
-Several tools that examiner utilize in 802.11 forensics can also be used be attackers for malicious purposes. One such tool is the Engage Packet Builder tool. The Engage Packet Builder tool allows the user to create/inject packets and most notable allows the user to be able to spoof their IP address to become anonymous. This tool can be used for DOS type attacks. 
+Several tools that examiners utilize in 802.11 forensics can also be used by attackers for malicious purposes. One such tool is the Engage Packet Builder tool. The Engage Packet Builder tool allows the user to create/inject packets and most notable allows the user to be able to spoof their IP address to become anonymous. This tool can be used for DOS type attacks. 
 %Below is a screenshot from the Engage Packet Builder tool’s interface:
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.5\linewidth]{imgs/engage.jpg}
-  \caption{Screenshot of the Engage Packet Builder tool's interface}
-  \label{fig:engage}
-\end{figure}
+%\begin{figure}[H]
+%  \centering
+%  \includegraphics[width=0.5\linewidth]{imgs/engage.jpg}
+%  \caption{Screenshot of the Engage Packet Builder tool's interface}
+%  \label{fig:engage}
+%\end{figure}
 
 \subsection{Aircrack}
 
@@ -221,27 +273,27 @@ Attackers can also utilize Wireshark and a tool called Aircrack-ng in order to c
 
 \subsection{Universal Forensic Extraction Device}
 
-“The term “mobile devices” encompasses a wide array of gadgets ranging from mobile phones, smartphones, tablets, and GPS units to wearables and PDAs” \cite{Kostadinov_2019}. Similarly to WiFi, mobile devices have become part of the everyday norm for people. A person can usually not go more than 10 minutes without checking their mobile phone unless they are asleep. Mobile devices such as cell phone can contain a ton of personal information, from banking information to passwords and because of that, mobile devices are a key in some investigations and a target for attackers. 
+The term “mobile devices” encompasses a wide array of gadgets ranging from mobile phones, smartphones, tablets, and GPS units to wearables and PDAs” \cite{Kostadinov_2019}. Similarly to WiFi, mobile devices have become part of the everyday norm for people. A person can usually not go more than 10 minutes without checking their mobile phone unless they are asleep. Mobile devices such as cell phone can contain a ton of personal information, from banking information to passwords and because of that, mobile devices are a key in some investigations and a target for attackers. 
 UFED (Universal Forensic Extraction Device) by Cellebrite is a powerful licensed tool for mobile forensics that allows an investigator to bypass pattern, password or PIN locked devices on both Android and iOS devices, collect data from phones, SIM cards, SD cards, GPS devices, and access data from a variety of different apps. 
 %Below is a screenshot of one of the UFED menu lists:
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.5\linewidth]{imgs/ufed.jpg}
-  \caption{Screenshot of the UFED menu lists}
-  \label{fig:ufed}
-\end{figure}
+%\begin{figure}[H]
+%  \centering
+%  \includegraphics[width=0.5\linewidth]{imgs/ufed.jpg}
+%  \caption{Screenshot of the UFED menu lists}
+%  \label{fig:ufed}
+%\end{figure}
 
 \subsection{iOS Forensic Toolkit}
 
 For iOS specific forensics, the Elcomsoft iOS Forensic Toolkit is extremely useful. This tool can extract all of the data on an iOS device to include, backups, crash logs, media, shared files and can automatically disable screen lock once a device is connected. This tool will work with and iOS device including Apple watches and TV. %Below is a screenshot of the iOS Forensic Toolkit’s main menu:
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.5\linewidth]{imgs/ftk.jpg}
-  \caption{Screenshot of iOS Forensic Toolkit’s main menu}
-  \label{fig:ftk}
-\end{figure}
+%\begin{figure}[H]
+%  \centering
+%  \includegraphics[width=0.5\linewidth]{imgs/ftk.jpg}
+%  \caption{Screenshot of iOS Forensic Toolkit’s main menu}
+%  \label{fig:ftk}
+%\end{figure}
 
 \subsection{Oxygen}
 
@@ -255,10 +307,13 @@ Oxygen Forensic Detective is another powerful tool for mobile forensics. This to
   \label{fig:oxygen}
 \end{figure}
  
-Overall, this was just a small sample size of the available tools for that can be used for 802.11 and mobile forensics. There are several different vendors that supply a variety of forensic tools that can be used for law enforcement, government agencies and if in the wrong hands can be used by attackers. As technology becomes more unadvanced and encryption methods become harder to bypass, tools will continue to have to be upgraded or developed in order to keep up with the ability to conduct successful sound evidence.
+Overall, this was just a small sample size of the available tools for that can be used for 802.11 and mobile forensics. There are several different vendors that supply a variety of forensic tools that can be used for law enforcement, government agencies and if in the wrong hands can be used by attackers. As technology becomes more advanced and encryption methods become harder to bypass, tools will continue to have to be upgraded or developed in order to keep up with the ability to conduct successful sound forensic investigations.
+
 
 \section{Conclusion}
-%% TODO add conclusion
+
+While wireless technology has been around for many decades, it was not until the mid-2000s that it began to take over the world. Nearly every category of electronic devices has a wireless entry. Many of these devices are not manufactured for long term use and wireless security is a mere afterthought. Many IOT devices lack encryption or user authentication protocols. Newer research is finding that these devices may become conduits for bad actors to gain backdoor entries to networks. Luckily, Digital Forensic and Incident Response (DFIR) professionals and researchers are hard at work understanding these technologies to help prevent our wireless infrastructure. As result of their work, new tools have been developed to find malicious artifacts, evidentiary artifacts, and to probe for vulnerabilities. 
+
 
 \bibliographystyle{style/ACM-Reference-Format}
 \bibliography{references}
